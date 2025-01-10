@@ -1,0 +1,44 @@
+import os
+import time
+from google.assistant.library import Assistant
+from google.assistant.library.event import EventType
+from googlesamples.assistant.grpc.audio_helpers import play_wave_file
+from googlesamples.assistant.grpc.device_helpers import DeviceRequestHandler
+
+class HomeAutomation:
+    def __init__(self):
+        self.assistant = None
+        self.light_status = False
+
+    def start_assistant(self):
+        self.assistant = Assistant(os.path.expanduser('~/path/to/credentials.json'))
+        self.assistant.start()
+        for event in self.assistant:
+            self.process_event(event)
+
+    def process_event(self, event):
+        if event.type == EventType.ON_CONVERSATION_TURN_STARTED:
+            print('Conversation started')
+        elif event.type == EventType.ON_RECOGNIZING_SPEECH_FINISHED and event.args:
+            command = event.args['text'].lower()
+            self.execute_command(command)
+        elif event.type == EventType.ON_CONVERSATION_TURN_FINISHED:
+            print('Conversation finished')
+
+    def execute_command(self, command):
+        if 'turn on the light' in command:
+            self.turn_on_light()
+        elif 'turn off the light' in command:
+            self.turn_off_light()
+
+    def turn_on_light(self):
+        self.light_status = True
+        print('Light turned on')
+
+    def turn_off_light(self):
+        self.light_status = False
+        print('Light turned off')
+
+if __name__ == '__main__':
+    home_automation = HomeAutomation()
+    home_automation.start_assistant()
